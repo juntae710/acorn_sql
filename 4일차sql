@@ -1,0 +1,316 @@
+CREATE TABLE t_emp(
+eid VARCHAR2(13) NOT NULL PRIMARY KEY ,
+ename VARCHAR2(20) ,
+salary NUMBER(5) ,
+deptno NUMBER(5) ,
+comm NUMBER(5)
+);
+COMMIT;
+
+INSERT INTO t_emp VALUES ('e001' , '신동엽' , 280,10,100) ;
+INSERT INTO t_emp VALUES ('e002' , '유재석' , 250,20,50) ;
+INSERT INTO t_emp VALUES ('e003' , '전현무' , 190,30,0) ;
+INSERT INTO t_emp VALUES ('e004' , '양세영' , 300,20,0) ;
+INSERT INTO t_emp VALUES ('e005' , '양세찬' , 290,40,100) ;
+CREATE TABLE t_dept(
+deptno NUMBER(5) NOT NULL PRIMARY KEY ,
+dname VARCHAR2(20)
+);
+COMMIT;
+
+INSERT INTO t_dept VALUES (10 , '영업팀') ;
+INSERT INTO t_dept VALUES (20 , '기획팀') ;
+INSERT INTO t_dept VALUES (30 , '관리팀') ;
+INSERT INTO t_dept VALUES (40 , '마케팅팀') ;
+INSERT INTO t_dept VALUES (50 , '재무팀') ;
+COMMIT;
+
+--view 만들기
+SELECT * FROM t_emp;
+SELECT * FROM t_dept;
+
+--단순뷰
+create view v_emp3
+as
+select ename,deptno
+from t_emp;
+
+select * from v_emp3;
+
+--복잡 뷰
+CREATE VIEW v_emp2
+AS
+SELECT e.ename, d.dname
+FROM t_emp e, t_dept d
+WHERE e.deptno = d.deptno ;
+
+CREATE VIEW v_emp22
+AS
+SELECT e.ename, d.dname
+FROM t_emp e
+join t_dept d
+on e.deptno = d.deptno ;
+
+--인라인 뷰(from뒤에오는 서브쿼리를 말함)
+SELECT e.deptno , d.dname , e.maxsal
+FROM(
+SELECT deptno , MAX(salary) maxsal
+FROM t_emp
+GROUP BY deptno
+) e , t_dept d
+WHERE e.deptno = d.deptno ;
+
+select * from(
+select ocode, pcode, sale_cnt
+from tbl_test_order ) o
+JOIN tbl_test_goods g
+on o.pcode = g.pcode
+;
+
+--scott 에 view 권한 주기
+--cmd창 열기
+-- sqlplus /as sysdba; dba 접속한다.
+--grant create view to scott; scott에 view 권한주기
+
+--서브쿼리
+SELECT ename, salary from t_emp
+Where salary > ( select salary from t_emp where ename='신동엽') ;
+
+SELECT ename, salary from t_emp
+Where salary > 280 ;
+
+SELECT eid, ename, deptno FROM t_emp
+WHERE deptno IN ( SELECT deptno FROM t_dept WHERE dname='기획팀' or dname= '마케팅팀' );
+
+SELECT eid, ename, deptno FROM t_emp
+WHERE deptno IN ( 20, 40);
+
+--평균 급여 보다 높은 사람 조회하기
+select * from t_emp;
+
+select ename,salary
+from t_emp
+where salary > 250;
+
+select ename,salary
+from t_emp
+where salary > (select avg(salary) from t_emp);
+
+SELECT * FROM member_tbl_11;
+--데이터 추가하기
+--모든 컬럼의 값을 순서대로 입력해야함
+INSERT INTO member_tbl_11 values('test','0000','표준태','000-111-3333','2001-09-14',null,null);
+--
+INSERT INTO member_tbl_11(m_id,m_pw,m_name) values('tset2','1234','홍길동');
+commit;
+select * from member_tbl_11;
+
+--
+create table professor3
+as
+select * from professor;
+
+create table professor4
+as
+select * from professor
+where 1=2; -- 불일치 조건 만들기
+
+insert into professor4
+select * from professor4;
+
+--update (데이터 변경)
+select * from member_tbl_11 where m_name= '표준태';
+
+update MEMBER_TBL_11
+set M_TEL = '010-222-4444'
+where m_id = 'test';
+
+commit;
+
+select * from member_tbl_11;
+--모든 고객 포인트 기존 포인트에서 1000 증가시기키는 update
+update MEMBER_TBL_11
+set M_point = M_point+1000;
+
+UPDATE member_tbl_11
+ set m_point = nvl((m_point+1000),1000);
+ 
+ select * from member_tbl_12;
+ 
+ update MEMBER_TBL_12
+set M_point = nvl(M_point+1000,1000);
+
+--delete
+delete 
+from MEMBER_TBL_11
+where m_id='test0';
+commit;
+
+--테이블 생성하기
+create table member2(
+ id varchar2 (7),
+ name varchar2 (10)
+);
+
+select * from member2;
+
+--테이블 정보 수정하기
+alter table member2 modify id varchar2 (5);
+alter table member2 add(addr varchar2 (5));
+alter table member2 rename column id to user_id;
+alter table member2 drop COLUMN addr;
+desc member2;
+
+create table tt02
+(no number(3,1) default 0,
+name varchar2(10) default 'no name',
+hiredate date default sys date
+);
+
+create table  tt02
+ (no number(3,1) default 0 ,
+  name varchar2(10) default  'no name' ,
+  hiredate  date  default  sysdate
+  );
+  insert into tt02(no) values(1);
+  select * from tt02;
+  
+  --테이블 삭제하기
+  drop table tt02; --테이블 자체를 삭제함 (스키마까지 삭제)
+  truncate table tt02; --테이블 정보는 남는다.
+  
+select * from tbl_test_customer;
+
+select * from tbl_test_order;
+
+insert into tbl_test_order(ocode, odate, id , pcode,sale_cnt)
+values('J009','2023-08-22','H007','P001',100);
+
+--도메인 제약조건
+create table test_2021
+(
+id varchar2(7) not null ,
+email varchar2(50) null ,
+phone char(13) not null,
+pwd varchar2(7) default '111'
+);
+insert into test_2021 (id,email,phone)
+values('test01','aaa@naver.com','010-000-1111');
+
+--체크 제약
+create table test_2021_2
+(
+id varchar2(50) null ,
+phone varchar2(20) check (phone like '010-%-____') not null ,
+email varchar2(50) null
+);
+insert into test_2021_2 (id,phone)
+values ('test01','010-1111-1110');
+
+create table test_2021_0
+(
+id varchar2(50) not null,
+email varchar2(200) null ,
+phone char(13) not null,
+pwd varchar2(200) default '111' ,
+grade CHAR(2) CHECK( grade IN ('01', '02', '03'))
+);
+insert into test_2021_0(id, phone, grade)
+values ('test01','010-111-222','03');
+
+--엔티티 제약 (테이블 내에서 제약)
+create table test_2021_3
+(
+id varchar2(7) not null primary key ,
+email varchar2(50) ,
+phone char(13) unique ,
+pwd varchar2(10)
+)
+insert into test_2021_3 values('a10' , 'aaa@naver.com' ,'010-111-2222' , '111');
+insert into test_2021_3 values('b10' , 'bbb@naver.com' ,'010-222-3333' , '222');
+insert into test_2021_3 values('b20' , 'ccc@naver.com' ,'010-333-4444' , '333');
+insert into test_2021_3 values('c10' , 'ddd@naver.com' ,'010-111-2222' , '444');
+
+select * from test_2021_3;
+
+--릴레이션 제약
+create table mem_tbl (
+id varchar2(5) not null primary key ,
+name varchar2(10) not null ,
+addr varchar2(10)
+);
+insert into mem_tbl values( 'a1' , '홍길동' , '서울') ;
+insert into mem_tbl values( 'a2' , '홍길순', '부산');
+
+create table ord_tbl (
+no varchar2(5) not null primary key ,
+qty number(4) ,
+cus_no varchar2(5)
+);
+
+insert into ord_tbl values( 'j01' , 3, 'a1' );
+insert into ord_tbl values( 'j02' , 1, 'a1' );
+insert into ord_tbl values( 'j03' , 7, 'a2' );
+
+--제약 경험 해보기
+create table dept2(
+dcode VARCHAR2(6) primary key
+);
+insert into dept2 values('10');
+select * from dept2;
+
+create table new_emp1(
+no NUMBER(4) 
+constraint emp1_no_pk primary key,
+name varchar2(20) 
+constraint emp1_name_nn not null,
+jumin varchar2(13) 
+constraint emp1_jumin_nn not null
+constraint emp1_jumin_uk unique,
+loc_code number(1) 
+constraint emp1_area_ck check(loc_code<5),
+deptno varchar2(6) 
+constraint emp1_deptno_fk references dept2(dcode)
+);
+
+select * from new_emp1;
+insert into new_emp1(no,NAME,jumin,loc_code,deptno) values(0001,'표준태',111111-2222222,1,10);
+insert into new_emp1(no,NAME,jumin,loc_code,deptno) values(0002,'김준태',1111112222223,2,10);
+
+ create table p_inpo(
+ p_no NUMBER(4) primary key,
+ p_name  varchar2(10),
+ p_species varchar2(20) not null,
+ p_disease varchar2(20) not null,
+ g_name  varchar2(10)not null
+ );
+ insert into p_inpo values(0001,'수수','고양이','감기','표준태');
+ insert into p_inpo values(0002,'푸드리','강아지','발바닥화상','김현수');
+ insert into p_inpo values(0003,'콩알탄','아르마딜로','땀띠','곽단야');
+ insert into p_inpo values(0004,null,'길냥이','골절','표준태');
+ insert into p_inpo values(0005,'땅콩','강아지','감기','제임스');
+
+create table g_inpo(
+g_name  varchar2(10) primary key,
+g_tel varchar2(20) check (g_tel like '010-____-____') not null,
+p_name  varchar2(10)
+);
+
+insert into g_inpo values('표준태','010-1111-2222','수수');
+insert into g_inpo values('김현수','010-1234-5678','푸드리');
+insert into g_inpo values('곽단야','010-3333-4444','콩알탄');
+insert into g_inpo values('제임스','010-1478-9632','땅콩');
+
+ drop table g_inpo;
+select * from p_inpo;
+select * from g_inpo;
+
+SELECT 
+p.P_NO 환자번호,
+nvl(p.P_NAME,' ') 환자이름,
+p.P_DISEASE 병명,
+g.G_NAME 보호자이름,
+ substr(g.g_tel,0,9) || '****'	 전화번호
+from p_inpo p
+join g_inpo g
+on p.G_NAME = g.G_NAME;
